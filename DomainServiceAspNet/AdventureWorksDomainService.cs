@@ -27,7 +27,7 @@ namespace DomainServiceAspNet
         // To support paging you will need to add ordering to the 'Products' query.
         public IQueryable<Product> GetProducts()
         {
-            return this.ObjectContext.Products;
+            return this.ObjectContext.Products.OrderBy(p => p.ProductID);
         }
 
         public void InsertProduct(Product product)
@@ -44,9 +44,18 @@ namespace DomainServiceAspNet
 
         public void UpdateProduct(Product currentProduct)
         {
-            this.ObjectContext.Products.AttachAsModified(currentProduct, this.ChangeSet.GetOriginal(currentProduct));
+            if ((currentProduct.EntityState == EntityState.Detached))
+            {
+                // Custom logic: set a lower limit for the price.
+                if (currentProduct.ListPrice < 5)
+                    throw new ValidationException("The list price must be >= 5.");
+                this.ObjectContext.Products.AttachAsModified(currentProduct,
+                   this.ChangeSet.GetOriginal(currentProduct));
+                // Custom logic: set the date to the current value.
+                currentProduct.ModifiedDate = DateTime.Today;
+            }
         }
-
+        
         public void DeleteProduct(Product product)
         {
             if ((product.EntityState != EntityState.Detached))

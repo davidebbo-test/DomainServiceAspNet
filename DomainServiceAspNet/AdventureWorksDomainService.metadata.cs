@@ -34,6 +34,7 @@ namespace DomainServiceAspNet
             {
             }
 
+            [Required(AllowEmptyStrings = false, ErrorMessage = "Color is required")]
             public string Color { get; set; }
 
             public Nullable<DateTime> DiscontinuedDate { get; set; }
